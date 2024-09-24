@@ -3,11 +3,11 @@ name: Flutter CI
 on:
   push:
     branches:
-      - main  # 當推送到 main 分支時觸發
+      - main
 
 jobs:
   build_apk:
-    runs-on: ubuntu-latest  # 使用 Ubuntu 環境來構建 APK
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -41,14 +41,14 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
 
   build_ipa:
-    runs-on: macos-latest  # 使用 macOS 環境來構建 IPA
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Install Flutter manually
         run: |
-          brew install --cask flutter  # 在 macOS 上使用 brew 安裝 Flutter
+          brew install --cask flutter
           export PATH="$PATH:`pwd`/flutter/bin"
           flutter doctor
         shell: bash
@@ -62,11 +62,11 @@ jobs:
       - name: Build IPA
         run: |
           export PATH="$PATH:`pwd`/flutter/bin"
-          flutter build ios --release --no-codesign  # 未簽名的 IPA
+          flutter build ios --release --no-codesign  # 使用 --no-codesign 跳過簽名
         shell: bash
 
       - name: Upload IPA
         uses: actions/upload-artifact@v3
         with:
           name: ipa
-          path: build/ios/Release-iphoneos/*.ipa  # 構建後 IPA 文件的路徑
+          path: build/ios/iphoneos/Runner.app  # 修改路徑為應用輸出的路徑
