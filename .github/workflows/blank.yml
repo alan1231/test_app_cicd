@@ -15,15 +15,21 @@ jobs:
       - name: Install Flutter manually
         run: |
           git clone https://github.com/flutter/flutter.git -b stable --depth 1
-          echo "export PATH=`pwd`/flutter/bin:\$PATH" >> $GITHUB_ENV
-          source $GITHUB_ENV
+          export PATH="$PATH:`pwd`/flutter/bin"
           flutter doctor
+        shell: bash
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter pub get
+        shell: bash
 
       - name: Build APK
-        run: flutter build apk --release
+        run: |
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter build apk --release
+        shell: bash
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
@@ -40,15 +46,21 @@ jobs:
       - name: Install Flutter manually
         run: |
           git clone https://github.com/flutter/flutter.git -b stable --depth 1
-          echo "export PATH=`pwd`/flutter/bin:\$PATH" >> $GITHUB_ENV
-          source $GITHUB_ENV
+          export PATH="$PATH:`pwd`/flutter/bin"
           flutter doctor
+        shell: bash
 
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter pub get
+        shell: bash
 
       - name: Build IPA
-        run: flutter build ios --release --no-codesign  # 未簽名的 IPA
+        run: |
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter build ios --release --no-codesign  # 未簽名的 IPA
+        shell: bash
 
       - name: Upload IPA
         uses: actions/upload-artifact@v3
