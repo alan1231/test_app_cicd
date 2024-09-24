@@ -1,44 +1,49 @@
 name: Flutter CI
 
+# This workflow is triggered on pushes to the repository.
 on:
   push:
     branches:
-      - main
+    - master
 
 jobs:
-  build_apk:
+  build:
+    # This job will run on ubuntu virtual machine
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Install Flutter manually
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip
-          wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.3-stable.tar.xz  # 使用 Flutter 3.24.3
-          tar xf flutter_linux_3.24.3-stable.tar.xz
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter doctor
-        shell: bash
-
-      - name: Install dependencies
-        run: |
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter pub get
-        shell: bash
-
-      - name: Build APK
-        run: |
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter build apk --release
-        shell: bash
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+    
+    # Setup Java environment in order to build the Android app.
+    - uses: actions/checkout@v1
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '12.x'
+    
+    # Setup the flutter environment.
+    - uses: subosito/flutter-action@v1
+      with:
+        channel: 'beta' # 'dev', 'alpha', default to: 'stable'
+    
+    # Get flutter dependencies.
+    - run: flutter pub get
+    
+    # Check for any formatting issues in the code.
+    - run: flutter format --set-exit-if-changed .
+    
+    # Statically analyze the Dart code for any errors.
+    - run: flutter analyze .
+    
+    # Run widget tests for our flutter project.
+    - run: flutter test
+    
+    # Build apk for the client4Development flavor.
+    - run: flutter build apk --flavor client4Development --release
+    
+    # Upload generated apk to the artifacts.
+    - uses: actions/upload-artifact@v1
+      with:
+        name: client4Development-apk
+        path: build/app/outputs/flutter-apk/app-client4Development-release.apk
+        
   build_ipa:
     runs-on: macos-latest
     steps:
