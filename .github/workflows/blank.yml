@@ -3,67 +3,65 @@ name: Flutter CI
 on:
   push:
     branches:
-      - main  # 當推送到 main 分支時觸發
+    - master  # 當推送到 master 分支時觸發
 
 jobs:
   build_apk:
-    runs-on: ubuntu-latest  # 使用 Ubuntu 環境來構建 APK
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Flutter manually
-        run: |
-          git clone https://github.com/flutter/flutter.git -b stable --depth 1
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter doctor
-        shell: bash
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '12.x'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
 
       - name: Install dependencies
-        run: |
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter pub get
-        shell: bash
+        run: flutter pub get
+
+      - name: Check formatting
+        run: flutter format --set-exit-if-changed .
+
+      - name: Analyze the code
+        run: flutter analyze .
+
+      - name: Run widget tests
+        run: flutter test
 
       - name: Build APK
-        run: |
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter build apk --release
-        shell: bash
+        run: flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
         with:
-          name: apk
+          name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
   build_ipa:
-    runs-on: macos-latest  # 使用 macOS 環境來構建 IPA
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install Flutter manually
-        run: |
-          git clone https://github.com/flutter/flutter.git -b stable --depth 1
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter doctor
-        shell: bash
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
 
       - name: Install dependencies
-        run: |
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter pub get
-        shell: bash
+        run: flutter pub get
 
       - name: Build IPA
-        run: |
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter build ios --release --no-codesign  # 未簽名的 IPA
-        shell: bash
+        run: flutter build ios --release --no-codesign
 
       - name: Upload IPA
         uses: actions/upload-artifact@v3
         with:
-          name: ipa
+          name: release-ipa
           path: build/ios/ipa/*.ipa
