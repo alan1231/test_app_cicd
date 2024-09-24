@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = "1.6.0"  // 修改這裡來使用 1.6.0 版本
+    ext.kotlin_version = "1.7.10"  // 修改這裡來使用 1.6.0 版本
     repositories {
         google()
         mavenCentral()
