@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest  # 使用 Ubuntu 環境來構建 APK
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Flutter manually
         run: |
@@ -41,7 +41,7 @@ jobs:
     runs-on: macos-latest  # 使用 macOS 環境來構建 IPA
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install Flutter manually
         run: |
