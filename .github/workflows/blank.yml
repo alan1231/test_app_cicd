@@ -35,7 +35,7 @@ jobs:
         shell: bash
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # 升級到 v4
         with:
           name: apk
           path: build/app/outputs/flutter-apk/app-release.apk
@@ -62,11 +62,11 @@ jobs:
       - name: Build IPA
         run: |
           export PATH="$PATH:`pwd`/flutter/bin"
-          flutter build ios --release --no-codesign  # 使用 --no-codesign 跳過簽名
+          flutter build ios --release --no-codesign  # 未簽名的 IPA
         shell: bash
 
       - name: Upload IPA
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # 升級到 v4
         with:
           name: ipa
-          path: build/ios/iphoneos/Runner.app  # 修改路徑為應用輸出的路徑
+          path: build/ios/iphoneos/Runner.app  # 輸出 Runner.app
