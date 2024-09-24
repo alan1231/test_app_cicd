@@ -3,7 +3,7 @@ name: Flutter CI
 on:
   push:
     branches:
-      - main  # 當推送到 main 分支時觸發工作流程
+      - main  # 當推送到 main 分支時觸發
 
 jobs:
   build_apk:
@@ -15,7 +15,7 @@ jobs:
       - name: Install Flutter manually
         run: |
           git clone https://github.com/flutter/flutter.git -b stable --depth 1
-          export PATH="$PATH:`pwd`/flutter/bin"
+          echo "export PATH=`pwd`/flutter/bin:\$PATH" >> $GITHUB_ENV
           flutter doctor
 
       - name: Install dependencies
@@ -39,7 +39,7 @@ jobs:
       - name: Install Flutter manually
         run: |
           git clone https://github.com/flutter/flutter.git -b stable --depth 1
-          export PATH="$PATH:`pwd`/flutter/bin"
+          echo "export PATH=`pwd`/flutter/bin:\$PATH" >> $GITHUB_ENV
           flutter doctor
 
       - name: Install dependencies
