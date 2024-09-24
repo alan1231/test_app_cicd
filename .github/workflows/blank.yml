@@ -1,10 +1,7 @@
 name: Flutter CI
 
 on:
-  push:
-    branches:
-    - master  # 當推送到 master 分支時觸發
-
+  workflow_dispatch:
 jobs:
   build_apk:
     runs-on: ubuntu-latest
