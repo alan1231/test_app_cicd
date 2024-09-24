@@ -14,7 +14,10 @@ jobs:
 
       - name: Install Flutter manually
         run: |
-          git clone https://github.com/flutter/flutter.git -b stable --depth 1
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.10.5-stable.tar.xz
+          tar xf flutter_linux_3.10.5-stable.tar.xz
           export PATH="$PATH:`pwd`/flutter/bin"
           flutter doctor
         shell: bash
@@ -45,7 +48,7 @@ jobs:
 
       - name: Install Flutter manually
         run: |
-          git clone https://github.com/flutter/flutter.git -b stable --depth 1
+          brew install --cask flutter  # 在 macOS 上使用 brew 安裝 Flutter
           export PATH="$PATH:`pwd`/flutter/bin"
           flutter doctor
         shell: bash
@@ -66,4 +69,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ipa
-          path: build/ios/ipa/*.ipa
+          path: build/ios/Release-iphoneos/*.ipa  # 構建後 IPA 文件的路徑
