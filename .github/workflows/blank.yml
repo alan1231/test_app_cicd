@@ -48,7 +48,7 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
 
   build_ipa:
-    runs-on: macos-latest  # 使用 macOS 環境來構建 IPA
+    runs-on: macos-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -58,7 +58,7 @@ jobs:
         with:
           flutter-version: 'stable'
 
-      - name: Get flutter dependencies
+      - name: Install dependencies
         run: flutter pub get
 
       - name: Build IPA
