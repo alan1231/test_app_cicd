@@ -42,7 +42,7 @@ jobs:
     - uses: actions/upload-artifact@v1
       with:
         name: client4Development-apk
-        path: build/app/outputs/flutter-apk/app-client4Development-release.apk
+        path: build/app/outputs/flutter-apk/app-development-release.apk
         
   build_ipa:
     runs-on: macos-latest
