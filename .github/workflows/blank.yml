@@ -27,17 +27,21 @@ jobs:
           wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.3-stable.tar.xz  # 使用最新版本的 Flutter
           tar xf flutter_linux_3.24.3-stable.tar.xz
           echo "$PWD/flutter/bin" >> $GITHUB_PATH  # 將 Flutter 添加到全局 PATH
+          export PATH="$PWD/flutter/bin:$PATH"
           flutter doctor
         shell: bash
 
       # 安裝 Flutter 依賴
       - name: Install dependencies
-        run: flutter pub get
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter pub get
         shell: bash
 
       # 構建 APK
       - name: Build APK
         run: |
+          export PATH="$PWD/flutter/bin:$PATH"
           flutter build apk --flavor client4Development --release
         shell: bash
 
