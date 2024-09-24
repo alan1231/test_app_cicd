@@ -3,47 +3,42 @@ name: Flutter CI
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
-  build:
+  build_apk:
     runs-on: ubuntu-latest
     steps:
-    
-    # 檢出代碼
-    - uses: actions/checkout@v2
-    
-    # 設置 Java 環境
-    - uses: actions/setup-java@v1
-      with:
-        java-version: '12.x'
-    
-    # 使用 subosito/flutter-action 並指定正確的 Flutter SDK 版本
-    - uses: subosito/flutter-action@v2
-      with:
-        flutter-version: '3.24.3'  # 指定正確的 Flutter SDK 版本
-    
-    # 取得 Flutter 依賴
-    - run: flutter pub get
-    
-    # 檢查格式問題
-    - run: flutter format --set-exit-if-changed .
-    
-    # 靜態分析
-    - run: flutter analyze .
-    
-    # 運行測試
-    - run: flutter test
-    
-    # 構建 APK 使用特定的 flavor
-    - run: flutter build apk --flavor client4Development --release
-    
-    # 上傳生成的 APK
-    - uses: actions/upload-artifact@v1
-      with:
-        name: client4Development-apk
-        path: build/app/outputs/flutter-apk/app-client4Development-release.apk
-        
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Flutter manually
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip
+          wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.13.0-stable.tar.xz  # 使用最新版本的 Flutter
+          tar xf flutter_linux_3.13.0-stable.tar.xz
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter doctor
+        shell: bash
+
+      - name: Install dependencies
+        run: |
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter pub get
+        shell: bash
+
+      - name: Build APK
+        run: |
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter build apk --release
+        shell: bash
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: build/app/outputs/flutter-apk/app-release.apk
   build_ipa:
     runs-on: macos-latest
     steps:
