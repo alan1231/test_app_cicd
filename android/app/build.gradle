@@ -1,9 +1,11 @@
 buildscript {
+    ext.kotlin_version = "1.6.0"  // 修改這裡來使用 1.6.0 版本
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.android.tools.build:gradle:8.0.2' // 使用最新版本的 Android Gradle 插件
     }
 }
