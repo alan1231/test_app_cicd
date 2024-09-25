@@ -2,10 +2,8 @@ name: Flutter CI
 
 on:
   push:
-    tags:
-      - 'client4Development-*'
-      - 'production-*'
-      - 'development-*'
+    branches:
+      - main
 
 jobs:
   build_app:
