@@ -6,11 +6,8 @@ on:
       - main
 
 jobs:
-  build_app:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
+  build_apk:
+    runs-on: android
 
     steps:
       - name: Checkout code
@@ -34,9 +31,8 @@ jobs:
             echo "FLAVOR_APP_NAME=App" >> $GITHUB_ENV
           fi
 
-      # 安裝 JDK (僅在 Ubuntu 上需要)
+      # 安裝 JDK
       - name: Set up JDK 17
-        if: matrix.os == 'ubuntu-latest'
         uses: actions/setup-java@v3
         with:
           java-version: '17'
@@ -44,7 +40,6 @@ jobs:
 
       # 安裝 Flutter
       - name: Install Flutter
-        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y unzip xz-utils
@@ -52,14 +47,6 @@ jobs:
           tar xf flutter_linux_3.24.3-stable.tar.xz
           echo "$PWD/flutter/bin" >> $GITHUB_PATH
           export PATH="$PWD/flutter/bin:$PATH"
-          flutter doctor
-        shell: bash
-
-      - name: Install Flutter (macOS)
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install --cask flutter
-          export PATH="$PATH:`pwd`/flutter/bin"
           flutter doctor
         shell: bash
 
@@ -72,31 +59,67 @@ jobs:
 
       # 構建 APK for Android
       - name: Build APK
-        if: matrix.os == 'ubuntu-latest'
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
           flutter build apk --flavor $FLAVOR --release
         shell: bash
 
-      # 構建 IPA for iOS
-      - name: Build IPA
-        if: matrix.os == 'macos-latest'
-        run: |
-          export PATH="$PWD/flutter/bin:$PATH"
-          flutter build ipa --flavor $FLAVOR --target lib/main.dart --release --no-codesign
-        shell: bash
-
       # 上傳 APK
       - name: Upload APK
-        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.FLAVOR }}-apk
           path: build/app/outputs/flutter-apk/*.apk
 
+  build_ipa:
+    runs-on: iOS
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 設定 FLAVOR 和 APP_NAME 根據 tag 名稱
+      - name: Set FLAVOR and APP_NAME from tag
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          if [[ $TAG_NAME == client4Development* ]]; then
+            echo "FLAVOR=client4Development" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+          elif [[ $TAG_NAME == development* ]]; then
+            echo "FLAVOR=development" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+          elif [[ $TAG_NAME == production* ]]; then
+            echo "FLAVOR=production" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+          else
+            echo "FLAVOR=default" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=App" >> $GITHUB_ENV
+          fi
+
+      # 安裝 Flutter (macOS)
+      - name: Install Flutter
+        run: |
+          brew install --cask flutter
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter doctor
+        shell: bash
+
+      # 安裝 Flutter 依賴
+      - name: Install dependencies
+        run: |
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter pub get
+        shell: bash
+
+      # 構建 IPA for iOS
+      - name: Build IPA
+        run: |
+          export PATH="$PATH:`pwd`/flutter/bin"
+          flutter build ipa --flavor $FLAVOR --target lib/main.dart --release --no-codesign
+        shell: bash
+
       # 上傳 IPA
       - name: Upload IPA
-        if: matrix.os == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.FLAVOR }}-ipa
