@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Text('hello'),
               Text('Flavor: $flavor'),
               Text('API URL: ${Config.apiUrl}'),
               Text('App Name: ${Config.appName}'),
