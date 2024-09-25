@@ -11,7 +11,7 @@ on:
 
 jobs:
   build_apk:
-    runs-on: android
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
@@ -76,7 +76,7 @@ jobs:
           path: build/app/outputs/flutter-apk/*.apk
 
   build_ipa:
-    runs-on: iOS
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
