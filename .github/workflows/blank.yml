@@ -2,32 +2,66 @@ name: Flutter CI
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'client4Development-*'
+      - 'production-*'
+      - 'development-*'
 
 jobs:
-  build_apk:
-    runs-on: ubuntu-latest
+  build_app:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 安裝 JDK
+      # 設定 FLAVOR 和 APP_NAME 根據 tag 名稱
+      - name: Set FLAVOR and APP_NAME from tag
+        run: |
+          TAG_NAME=${GITHUB_REF##*/}
+          if [[ $TAG_NAME == client4Development* ]]; then
+            echo "FLAVOR=client4Development" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+          elif [[ $TAG_NAME == development* ]]; then
+            echo "FLAVOR=development" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+          elif [[ $TAG_NAME == production* ]]; then
+            echo "FLAVOR=production" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+          else
+            echo "FLAVOR=default" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=App" >> $GITHUB_ENV
+          fi
+
+      # 安裝 JDK (僅在 Ubuntu 上需要)
       - name: Set up JDK 17
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/setup-java@v3
         with:
           java-version: '17'
           distribution: 'temurin'
 
       # 安裝 Flutter
-      - name: Install Flutter manually
+      - name: Install Flutter
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update
           sudo apt-get install -y unzip xz-utils
-          wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.3-stable.tar.xz  # 使用最新版本的 Flutter
+          wget https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.3-stable.tar.xz
           tar xf flutter_linux_3.24.3-stable.tar.xz
-          echo "$PWD/flutter/bin" >> $GITHUB_PATH  # 將 Flutter 添加到全局 PATH
+          echo "$PWD/flutter/bin" >> $GITHUB_PATH
           export PATH="$PWD/flutter/bin:$PATH"
+          flutter doctor
+        shell: bash
+
+      - name: Install Flutter (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew install --cask flutter
+          export PATH="$PATH:`pwd`/flutter/bin"
           flutter doctor
         shell: bash
 
@@ -38,46 +72,34 @@ jobs:
           flutter pub get
         shell: bash
 
-      # 構建 APK
+      # 構建 APK for Android
       - name: Build APK
+        if: matrix.os == 'ubuntu-latest'
         run: |
           export PATH="$PWD/flutter/bin:$PATH"
-          flutter build apk --flavor client4Development --release
+          flutter build apk --flavor $FLAVOR --release
+        shell: bash
+
+      # 構建 IPA for iOS
+      - name: Build IPA
+        if: matrix.os == 'macos-latest'
+        run: |
+          export PATH="$PWD/flutter/bin:$PATH"
+          flutter build ipa --flavor $FLAVOR --target lib/main.dart --release --no-codesign
         shell: bash
 
       # 上傳 APK
       - name: Upload APK
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: client4Development-apk
+          name: ${{ env.FLAVOR }}-apk
           path: build/app/outputs/flutter-apk/*.apk
-  build_ipa:
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
-      - name: Install Flutter manually
-        run: |
-          brew install --cask flutter
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter doctor
-        shell: bash
-
-      - name: Install dependencies
-        run: |
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter pub get
-        shell: bash
-
-      - name: Build IPA
-        run: |
-          export PATH="$PATH:`pwd`/flutter/bin"
-          flutter build ios --release --no-codesign  # 未簽名的 IPA
-        shell: bash
-
+      # 上傳 IPA
       - name: Upload IPA
-        uses: actions/upload-artifact@v4  # 升級到 v4
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
         with:
-          name: ipa
-          path: build/ios/iphoneos/Runner.app  # 輸出 Runner.app
+          name: ${{ env.FLAVOR }}-ipa
+          path: build/ios/ipa/*.ipa
