@@ -2,8 +2,6 @@ name: Flutter CI
 
 on:
   push:
-    branches:
-      - main
     tags:
       - 'client4Development-*'
       - 'production-*'
@@ -17,19 +15,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 設定 FLAVOR 和 APP_NAME 根據 tag 名稱
-      - name: Set FLAVOR and APP_NAME from tag
+      # 設定 Android 的 FLAVOR 和 APP_NAME 根據 tag 名稱
+      - name: Set Android FLAVOR and APP_NAME from tag
         run: |
           TAG_NAME=${GITHUB_REF##*/}
           if [[ $TAG_NAME == client4Development* ]]; then
             echo "FLAVOR=client4Development" >> $GITHUB_ENV
-            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=TestV Client4 Development" >> $GITHUB_ENV
           elif [[ $TAG_NAME == development* ]]; then
             echo "FLAVOR=development" >> $GITHUB_ENV
-            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=TestV Development" >> $GITHUB_ENV
           elif [[ $TAG_NAME == production* ]]; then
             echo "FLAVOR=production" >> $GITHUB_ENV
-            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=TestV Production" >> $GITHUB_ENV
           else
             echo "FLAVOR=default" >> $GITHUB_ENV
             echo "FLAVOR_APP_NAME=App" >> $GITHUB_ENV
@@ -82,21 +80,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 設定 FLAVOR 和 APP_NAME 根據 tag 名稱
-      - name: Set FLAVOR and APP_NAME from tag
+      # 設定 iOS 的 FLAVOR 和 APP_NAME 根據 tag 名稱
+      - name: Set iOS FLAVOR and APP_NAME from tag
         run: |
           TAG_NAME=${GITHUB_REF##*/}
           if [[ $TAG_NAME == client4Development* ]]; then
-            echo "FLAVOR=client4Development" >> $GITHUB_ENV
-            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+            echo "FLAVOR=Client4Scheme" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=TestV Client4 Development" >> $GITHUB_ENV
           elif [[ $TAG_NAME == development* ]]; then
-            echo "FLAVOR=development" >> $GITHUB_ENV
-            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+            echo "FLAVOR=Runner" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=TestV Development" >> $GITHUB_ENV
           elif [[ $TAG_NAME == production* ]]; then
-            echo "FLAVOR=production" >> $GITHUB_ENV
-            echo "FLAVOR_APP_NAME=${TAG_NAME}" >> $GITHUB_ENV
+            echo "FLAVOR=Runner" >> $GITHUB_ENV
+            echo "FLAVOR_APP_NAME=TestV Production" >> $GITHUB_ENV
           else
-            echo "FLAVOR=default" >> $GITHUB_ENV
+            echo "FLAVOR=Runner" >> $GITHUB_ENV
             echo "FLAVOR_APP_NAME=App" >> $GITHUB_ENV
           fi
 
